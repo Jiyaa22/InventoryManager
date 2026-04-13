@@ -1,0 +1,21 @@
+# maven
+target/
+
+# compiled files
+*.class
+
+# logs
+*.log
+
+# database
+*.db
+
+# OS files
+.DS_Store
+
+# IDE files
+.vscode/
+.idea/
+
+# temp files
+*.tmp

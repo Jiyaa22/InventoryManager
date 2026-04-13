@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Inventory | Login</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 450px;
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .auth-card::before {
+            content: '';
+            position: absolute;
+            top: -50px; left: -50px; right: -50px; bottom: -50px;
+            background: linear-gradient(135deg, rgba(255,255,255,0.4), rgba(255,255,255,0.1));
+            filter: blur(20px);
+            z-index: -1;
+        }
+        .auth-card h2 {
+            font-size: 2.2rem;
+            margin-bottom: 10px;
+        }
+        .auth-card p {
+            margin-bottom: 30px;
+            color: var(--text-dark);
+            opacity: 0.8;
+        }
+        .toggle-link {
+            display: block;
+            margin-top: 25px;
+            color: var(--burgundy);
+            font-weight: 600;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .toggle-link:hover {
+            text-decoration: underline;
+        }
+        #error-msg {
+            color: #d9534f;
+            margin-bottom: 20px;
+            font-weight: 600;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="auth-container">
+    <div class="glass-panel auth-card" id="auth-box">
+        <h2 id="auth-title">Welcome Back</h2>
+        <p id="auth-subtitle">Login to your fashion inventory</p>
+
+        <div id="error-msg"></div>
+
+        <form id="auth-form" onsubmit="handleAuth(event)">
+            <input type="text" id="username" class="input-field" placeholder="Username" required>
+            <input type="password" id="password" class="input-field" placeholder="Password" required>
+            
+            <button type="submit" class="btn-primary" style="width: 100%; font-size: 1.1rem; padding: 15px;" id="submit-btn">Login</button>
+        </form>
+
+        <a class="toggle-link" onclick="toggleAuthMode()">New here? Create an account</a>
+    </div>
+</div>
+
+<script>
+    let isLogin = true;
+
+    function toggleAuthMode() {
+        isLogin = !isLogin;
+        document.getElementById('auth-title').innerText = isLogin ? 'Welcome Back' : 'Create Account';
+        document.getElementById('auth-subtitle').innerText = isLogin ? 'Login to your fashion inventory' : 'Sign up to start managing your inventory';
+        document.getElementById('submit-btn').innerText = isLogin ? 'Login' : 'Sign Up';
+        document.querySelector('.toggle-link').innerText = isLogin ? 'New here? Create an account' : 'Already have an account? Login setup';
+        document.getElementById('error-msg').style.display = 'none';
+        document.getElementById('auth-form').reset();
+    }
+
+    async function handleAuth(e) {
+        e.preventDefault();
+        const username = document.getElementById('username').value;
+        const password = document.getElementById('password').value;
+        const endpoint = isLogin ? '/api/auth/login' : '/api/auth/register';
+
+        try {
+            const res = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ username, password })
+            });
+            const data = await res.json();
+
+            if (res.ok) {
+                localStorage.setItem('userId', data.userId);
+                // Fix for undefined: Always use the input value for username
+                localStorage.setItem('username', username);
+                window.location.href = '/home.html';
+            } else {
+                const errDiv = document.getElementById('error-msg');
+                errDiv.innerText = data.message || 'Authentication failed';
+                errDiv.style.display = 'block';
+            }
+        } catch (err) {
+            console.error(err);
+            const errDiv = document.getElementById('error-msg');
+            errDiv.innerText = 'Network error. Make sure server is running.';
+            errDiv.style.display = 'block';
+        }
+    }
+
+    // Auto redirect index.html to home if logged in, but just keep it simple.
+    if(localStorage.getItem('userId')) {
+        // window.location.href = '/home.html';
+    }
+</script>
+</body>
+</html>

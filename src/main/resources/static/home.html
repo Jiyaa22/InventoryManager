@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Inventory | Home</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css">
+    <style>
+        .hero {
+            padding: 60px 20px;
+            text-align: center;
+        }
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        .hero p {
+            font-size: 1.2rem;
+            max-width: 600px;
+            margin: 0 auto 40px auto;
+        }
+        /* Marquee specific styles */
+        .marquee-container {
+            width: 100%;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            padding: 20px 0;
+            border-top: 1px solid var(--glass-border);
+            border-bottom: 1px solid var(--glass-border);
+            margin-bottom: 50px;
+            white-space: nowrap;
+            position: relative;
+        }
+        .marquee {
+            display: inline-block;
+            animation: scroll 20s linear infinite;
+        }
+        .marquee img {
+            height: 450px; /* Increased size to make it fun */
+            width: auto;
+            border-radius: 20px;
+            margin: 0 25px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            object-fit: cover;
+            cursor: pointer;
+        }
+        .marquee img:hover {
+            transform: scale(1.1) rotate(2deg);
+        }
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .btn-large {
+            font-size: 1.2rem;
+            padding: 15px 40px;
+            border-radius: 50px;
+            text-decoration: none;
+            display: inline-block;
+            margin-top: 20px;
+            box-shadow: 0 8px 15px rgba(91, 28, 43, 0.2);
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/home.html" class="logo">INVENTORY MANAGER</a>
+    <div class="nav-links">
+        <a href="#" id="username-display">User</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="hero">
+    <h1>Welcome to Your Collection</h1>
+    <p>Manage your entire fashion inventory smoothly and visually. Explore your styles, update your stock, and keep track of your pieces all in one place.</p>
+</div>
+
+<!-- Scrolling header images for visual appeal -->
+<div class="marquee-container">
+    <div class="marquee" id="marquee-content">
+        <!-- Duplicate images to create a seamless infinite scroll -->
+        <img src="/images/img1.jpeg" alt="Fashion Image 1">
+        <img src="/images/img2.jpeg" alt="Fashion Image 2">
+        <img src="/images/img3.jpeg" alt="Fashion Image 3">
+        <!-- Duplicates -->
+        <img src="/images/img1.jpeg" alt="Fashion Image 1">
+        <img src="/images/img2.jpeg" alt="Fashion Image 2">
+        <img src="/images/img3.jpeg" alt="Fashion Image 3">
+    </div>
+</div>
+
+<div style="text-align: center; padding-bottom: 60px;">
+    <a href="/categories.html" class="btn-primary btn-large">Go to Inventory</a>
+</div>
+
+<script>
+    if(!localStorage.getItem('userId')) {
+        window.location.href = '/index.html';
+    } else {
+        document.getElementById('username-display').innerText = "Hello, " + localStorage.getItem('username');
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+</script>
+
+</body>
+</html>
