@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fashion Inventory | Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/styles.css?v=2">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .page-header {
+            text-align: center;
+            padding: 40px 20px 20px 20px;
+        }
+        .page-header h1 {
+            font-size: 2.8rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="/home.html" class="logo">INVENTORY MANAGER</a>
+    <div class="nav-links">
+        <a href="/home.html">Home</a>
+        <a href="/categories.html">Categories</a>
+        <a href="#" onclick="logout()">Logout</a>
+    </div>
+</div>
+
+<div class="page-header">
+    <h1>Dashboard</h1>
+    <p>Overview of your fashion inventory</p>
+</div>
+
+<div class="dashboard-grid">
+    <div class="dashboard-card">
+        <h3>Total Products</h3>
+        <div class="metric" id="total-products">0</div>
+    </div>
+    <div class="dashboard-card">
+        <h3>Total Stock</h3>
+        <div class="metric" id="total-stock">0</div>
+    </div>
+    <div class="dashboard-card">
+        <h3>Most Stocked</h3>
+        <div class="metric" style="font-size: 1.5rem; margin-top: 15px;" id="most-stocked">-</div>
+    </div>
+    <div class="dashboard-card">
+        <h3>Least Stocked</h3>
+        <div class="metric" style="font-size: 1.5rem; margin-top: 15px;" id="least-stocked">-</div>
+    </div>
+</div>
+
+<div class="chart-wrapper">
+    <canvas id="inventoryChart"></canvas>
+</div>
+
+<script>
+    if(!localStorage.getItem('userId')) {
+        window.location.href = '/index.html';
+    }
+
+    function logout() {
+        localStorage.clear();
+        window.location.href = '/index.html';
+    }
+
+    async function loadDashboard() {
+        try {
+            const res = await fetch('/api/products');
+            const products = await res.json();
+            
+            if (products.length === 0) {
+                document.getElementById('most-stocked').innerText = "N/A";
+                document.getElementById('least-stocked').innerText = "N/A";
+                return;
+            }
+
+            // Calculate metrics
+            let totalProducts = products.length;
+            let totalStock = 0;
+            
+            let maxProduct = products[0];
+            let minProduct = products[0];
+
+            products.forEach(p => {
+                totalStock += p.stock;
+                if (p.stock > maxProduct.stock) maxProduct = p;
+                if (p.stock < minProduct.stock) minProduct = p;
+            });
+
+            // Update DOM
+            document.getElementById('total-products').innerText = totalProducts;
+            document.getElementById('total-stock').innerText = totalStock;
+            
+            // Format highly stocked info
+            document.getElementById('most-stocked').innerText = `${maxProduct.name}\n(${maxProduct.stock})`;
+            document.getElementById('least-stocked').innerText = `${minProduct.name}\n(${minProduct.stock})`;
+
+            // Render Chart
+            renderChart(products);
+            
+        } catch (err) {
+            console.error("Failed to load dashboard data.", err);
+        }
+    }
+
+    function renderChart(products) {
+        const ctx = document.getElementById('inventoryChart').getContext('2d');
+        
+        // Sort products by stock to keep the chart cleanly organized
+        const sortedProducts = [...products].sort((a,b) => b.stock - a.stock);
+        
+        const labels = sortedProducts.map(p => p.name);
+        const data = sortedProducts.map(p => p.stock);
+
+        const gradient = ctx.createLinearGradient(0, 0, 0, 400);
+        gradient.addColorStop(0, 'rgba(128, 0, 32, 0.8)'); // burgundy
+        gradient.addColorStop(1, 'rgba(255, 209, 220, 0.6)'); // pink
+
+        new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Stock Quantity',
+                    data: data,
+                    backgroundColor: gradient,
+                    borderColor: 'rgba(128, 0, 32, 1)',
+                    borderWidth: 2,
+                    borderRadius: 10, // Rounded top edges
+                    hoverBackgroundColor: 'rgba(128, 0, 32, 1)'
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                        labels: {
+                            font: {
+                                family: 'Outfit',
+                                size: 14
+                            },
+                            color: '#2A1A1E'
+                        }
+                    },
+                    title: {
+                        display: true,
+                        text: 'Product Stock Levels',
+                        font: {
+                            family: 'Outfit',
+                            size: 20
+                        },
+                        color: '#800020'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            font: {
+                                family: 'Outfit'
+                            }
+                        }
+                    },
+                    x: {
+                        ticks: {
+                            font: {
+                                family: 'Outfit',
+                                size: 14
+                            }
+                        }
+                    }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeOutQuart'
+                }
+            }
+        });
+    }
+
+    // Initialize
+    loadDashboard();
+</script>
+
+</body>
+</html>
