@@ -16,6 +16,9 @@ public class Product {
     @Column(nullable = false)
     private String category;
 
+    @Column(nullable = true)
+    private String subcategory;
+
     @Column(nullable = false)
     private Integer stock;
 
@@ -24,9 +27,10 @@ public class Product {
 
     public Product() {}
 
-    public Product(String name, String category, Integer stock, String imageUrl) {
+    public Product(String name, String category, String subcategory, Integer stock, String imageUrl) {
         this.name = name;
         this.category = category;
+        this.subcategory = subcategory;
         this.stock = stock;
         this.imageUrl = imageUrl;
     }
@@ -39,6 +43,9 @@ public class Product {
 
     public String getCategory() { return category; }
     public void setCategory(String category) { this.category = category; }
+
+    public String getSubcategory() { return subcategory; }
+    public void setSubcategory(String subcategory) { this.subcategory = subcategory; }
 
     public Integer getStock() { return stock; }
     public void setStock(Integer stock) { this.stock = stock; }

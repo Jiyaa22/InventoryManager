@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Fashion Inventory | Categories</title>
+    <title>Fashion Inventory | Subcategories</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/styles.css">
     <style>
@@ -13,6 +13,7 @@
         }
         .page-header h1 {
             font-size: 2.8rem;
+            text-transform: capitalize;
         }
         
         .categories-grid {
@@ -74,14 +75,9 @@
             margin-bottom: 15px;
             z-index: 1;
         }
-
-        /* Specific card tints with higher opacity for readability */
-        .card-clothing { background: linear-gradient(135deg, rgba(255,209,220,0.85), rgba(255,255,255,0.8)); }
-        .card-accessories { background: linear-gradient(135deg, rgba(255,243,176,0.85), rgba(255,255,255,0.8)); }
-        .card-bags { background: linear-gradient(135deg, rgba(168,230,207,0.85), rgba(255,255,255,0.8)); }
-        .card-shoes { background: linear-gradient(135deg, rgba(220,160,175,0.85), rgba(255,255,255,0.8)); }
-        .card-makeup { background: linear-gradient(135deg, rgba(255,182,193,0.85), rgba(255,255,255,0.8)); }
-        .card-miscellaneous { background: linear-gradient(135deg, rgba(230,230,250,0.85), rgba(255,255,255,0.8)); }
+        
+        /* Theming */
+        .theme { background: linear-gradient(135deg, rgba(255,209,220,0.85), rgba(255,255,255,0.8)); }
         
     </style>
 </head>
@@ -91,51 +87,85 @@
     <a href="/home.html" class="logo">INVENTORY MANAGER</a>
     <div class="nav-links">
         <a href="/dashboard.html">Dashboard</a>
-        <a href="/home.html">Home</a>
+        <a href="/categories.html">Categories</a>
         <a href="#" onclick="logout()">Logout</a>
     </div>
 </div>
 
 <div class="page-header">
-    <h1>Select a Category</h1>
-    <p>Choose what you'd like to manage today</p>
+    <h1 id="page-title">Category</h1>
+    <p>Select a subcategory to manage</p>
 </div>
 
-<div class="categories-grid">
-    <a href="/subcategories.html?category=clothing" class="category-card card-clothing">
-        <div class="icon">👗</div>
-        <h2>Clothing</h2>
-    </a>
-    <a href="/subcategories.html?category=accessories" class="category-card card-accessories">
-        <div class="icon">💍</div>
-        <h2>Accessories</h2>
-    </a>
-    <a href="/subcategories.html?category=bags" class="category-card card-bags">
-        <div class="icon">👜</div>
-        <h2>Bags</h2>
-    </a>
-    <a href="/subcategories.html?category=shoes" class="category-card card-shoes">
-        <div class="icon">👠</div>
-        <h2>Shoes</h2>
-    </a>
-    <a href="/subcategories.html?category=makeup" class="category-card card-makeup">
-        <div class="icon">💄</div>
-        <h2>Makeup</h2>
-    </a>
-    <a href="/subcategories.html?category=miscellaneous" class="category-card card-miscellaneous">
-        <div class="icon">🎀</div>
-        <h2>Miscellaneous</h2>
-    </a>
+<div class="categories-grid" id="subcategories-grid">
+    <!-- Rendered via JS -->
 </div>
 
 <script>
     if(!localStorage.getItem('userId')) {
         window.location.href = '/index.html';
     }
+
     function logout() {
         localStorage.clear();
         window.location.href = '/index.html';
     }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const currentCategory = urlParams.get('category');
+    
+    if(!currentCategory) window.location.href = '/categories.html';
+    
+    document.getElementById('page-title').innerText = currentCategory + " Subcategories";
+
+    const subcategoryMap = {
+        'clothing': [
+            { name: 'Tops', icon: '👚' },
+            { name: 'Bottoms', icon: '👖' }
+        ],
+        'accessories': [
+            { name: 'Necklaces', icon: '📿' },
+            { name: 'Watches', icon: '⌚' }
+        ],
+        'bags': [
+            { name: 'Tote Bags', icon: '🛍️' },
+            { name: 'Shoulder Bags', icon: '👜' }
+        ],
+        'shoes': [
+            { name: 'Heels', icon: '👠' },
+            { name: 'Sandals', icon: '👡' }
+        ],
+        'makeup': [
+            { name: 'Lip Products', icon: '💄' },
+            { name: 'Base Products', icon: '🎨' }
+        ],
+        'miscellaneous': [
+            { name: 'General', icon: '🎀' }
+        ]
+    };
+
+    function loadSubcategories() {
+        const subs = subcategoryMap[currentCategory.toLowerCase()] || [];
+        const container = document.getElementById('subcategories-grid');
+        
+        if (subs.length === 0) {
+            window.location.href = `/inventory.html?category=${currentCategory}`;
+            return;
+        }
+
+        subs.forEach(sub => {
+            const a = document.createElement('a');
+            a.href = `/inventory.html?category=${currentCategory}&subcategory=${encodeURIComponent(sub.name.toLowerCase())}`;
+            a.className = 'category-card theme';
+            a.innerHTML = `
+                <div class="icon">${sub.icon}</div>
+                <h2>${sub.name}</h2>
+            `;
+            container.appendChild(a);
+        });
+    }
+
+    loadSubcategories();
 </script>
 
 </body>

@@ -23,8 +23,16 @@ public class ProductController {
     private ProductRepository productRepository;
 
     @GetMapping
-    public List<Product> getProducts(@RequestParam(required = false) String category, @RequestParam(required = false) String search) {
-        if (category != null && search != null && !search.isEmpty()) {
+    public List<Product> getProducts(
+            @RequestParam(required = false) String category, 
+            @RequestParam(required = false) String subcategory, 
+            @RequestParam(required = false) String search) {
+        
+        if (category != null && subcategory != null && search != null && !search.isEmpty()) {
+            return productRepository.findByCategoryAndSubcategoryAndNameContainingIgnoreCase(category, subcategory, search);
+        } else if (category != null && subcategory != null) {
+            return productRepository.findByCategoryAndSubcategory(category, subcategory);
+        } else if (category != null && search != null && !search.isEmpty()) {
             return productRepository.findByCategoryAndNameContainingIgnoreCase(category, search);
         } else if (category != null) {
             return productRepository.findByCategory(category);
@@ -61,6 +69,7 @@ public class ProductController {
         return productRepository.findById(id).map(product -> {
             product.setName(productDetails.getName());
             product.setCategory(productDetails.getCategory());
+            product.setSubcategory(productDetails.getSubcategory());
             product.setStock(productDetails.getStock());
             product.setImageUrl(productDetails.getImageUrl());
             return ResponseEntity.ok(productRepository.save(product));

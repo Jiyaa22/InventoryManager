@@ -214,13 +214,17 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const currentCategory = urlParams.get('category') || 'All';
-    document.getElementById('page-title').innerText = currentCategory + " Inventory";
+    const currentSubcategory = urlParams.get('subcategory') || '';
+
+    // Automatically upper case subcategory if string is available, else category
+    document.getElementById('page-title').innerText = (currentSubcategory ? currentSubcategory.charAt(0).toUpperCase() + currentSubcategory.slice(1) : currentCategory) + " Inventory";
 
     let allProducts = [];
 
     async function fetchProducts(search = '') {
         try {
             let url = `/api/products?category=${currentCategory}`;
+            if (currentSubcategory) url += `&subcategory=${currentSubcategory}`;
             if(search) url += `&search=${search}`;
             const res = await fetch(url);
             allProducts = await res.json();
@@ -336,6 +340,7 @@
         const payload = {
             name: document.getElementById('pName').value,
             category: currentCategory,
+            subcategory: currentSubcategory, // Map subcategory explicitly dynamically
             stock: parseInt(document.getElementById('pStock').value),
             imageUrl: imageUrl
         };
