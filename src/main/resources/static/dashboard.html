@@ -52,6 +52,18 @@
     </div>
 </div>
 
+<div style="text-align: center; margin-bottom: 10px;">
+    <select id="category-filter" class="input-field" style="width: 250px; display: inline-block; padding: 12px; border-radius: 12px;" onchange="filterChart()">
+        <option value="All">All Categories</option>
+        <option value="clothing">Clothing</option>
+        <option value="accessories">Accessories</option>
+        <option value="bags">Bags</option>
+        <option value="shoes">Shoes</option>
+        <option value="makeup">Makeup</option>
+        <option value="miscellaneous">Miscellaneous</option>
+    </select>
+</div>
+
 <div class="chart-wrapper">
     <canvas id="inventoryChart"></canvas>
 </div>
@@ -66,25 +78,28 @@
         window.location.href = '/index.html';
     }
 
+    let allProducts = [];
+    let inventoryChartInstance = null;
+
     async function loadDashboard() {
         try {
             const res = await fetch('/api/products');
-            const products = await res.json();
+            allProducts = await res.json();
             
-            if (products.length === 0) {
+            if (allProducts.length === 0) {
                 document.getElementById('most-stocked').innerText = "N/A";
                 document.getElementById('least-stocked').innerText = "N/A";
                 return;
             }
 
-            // Calculate metrics
-            let totalProducts = products.length;
+            // Calculate metrics using all fetched items
+            let totalProducts = allProducts.length;
             let totalStock = 0;
             
-            let maxProduct = products[0];
-            let minProduct = products[0];
+            let maxProduct = allProducts[0];
+            let minProduct = allProducts[0];
 
-            products.forEach(p => {
+            allProducts.forEach(p => {
                 totalStock += p.stock;
                 if (p.stock > maxProduct.stock) maxProduct = p;
                 if (p.stock < minProduct.stock) minProduct = p;
@@ -99,14 +114,27 @@
             document.getElementById('least-stocked').innerText = `${minProduct.name}\n(${minProduct.stock})`;
 
             // Render Chart
-            renderChart(products);
+            renderChart(allProducts);
             
         } catch (err) {
             console.error("Failed to load dashboard data.", err);
         }
     }
 
+    function filterChart() {
+        const cat = document.getElementById('category-filter').value;
+        let filtered = allProducts;
+        if (cat !== 'All') {
+            filtered = allProducts.filter(p => p.category && p.category.toLowerCase() === cat.toLowerCase());
+        }
+        renderChart(filtered);
+    }
+
     function renderChart(products) {
+        if (inventoryChartInstance) {
+            inventoryChartInstance.destroy();
+        }
+
         const ctx = document.getElementById('inventoryChart').getContext('2d');
         
         // Sort products by stock to keep the chart cleanly organized
@@ -119,7 +147,7 @@
         gradient.addColorStop(0, 'rgba(128, 0, 32, 0.8)'); // burgundy
         gradient.addColorStop(1, 'rgba(255, 209, 220, 0.6)'); // pink
 
-        new Chart(ctx, {
+        inventoryChartInstance = new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: labels,
